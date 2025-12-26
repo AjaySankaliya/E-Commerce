@@ -1,10 +1,17 @@
-const { register, verify } = require('../controllers/userController')
-const { registerValidation } = require('../validation/userValidation')
+const { register, verify, login, logout, forgotPassword, verifyOtp, changePassword, getAllUser } = require('../controllers/userController')
+const { isAdmin } = require('../middleware/isAdmin')
+const { isAuthenticated } = require('../middleware/isAuthenticated')
+const { registerValidation, loginValidation } = require('../validation/userValidation')
 
 const router=require('express').Router()
 
 router.post('/register',registerValidation,register)
-
 router.post('/verify',verify)
+router.post('/login',loginValidation,login)
+router.post('/logout',isAuthenticated,logout)
+router.post('/forgot-password',forgotPassword)
+router.post('/verify-otp/:email',verifyOtp)
+router.post('/change-password/:email',changePassword)
+router.get('/get-all-users',isAuthenticated,isAdmin,getAllUser)
 
 module.exports=router
