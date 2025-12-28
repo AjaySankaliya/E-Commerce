@@ -11,8 +11,8 @@ const registerValidation = (req, res, next) => {
   if (error) {
     return res.status(400).json({
       success: false,
-      message: "Bad Request",
-      err: error,
+      message: error.details[0].message,
+      err: error.details[0].message,
     });
   }
   next();
@@ -27,8 +27,8 @@ const loginValidation = (req, res, next) => {
   if (error) {
     return res.status(400).json({
       success: false,
-      message: "Bad Request",
-      err: error,
+      message: error.details[0].message,
+      err: error.details[0].message,
     });
   }
   next();
