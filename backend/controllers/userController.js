@@ -86,22 +86,23 @@ const verify = async (req, res) => {
 
 const login = async (req, res) => {
   const { email, password } = req.body;
+
   if (!email || !password) {
     return res.status(400).json({
       success: false,
-      message: "All field are required",
+      message: "All fields are required",
     });
   }
+
   const user = await User.findOne({ email });
   if (!user) {
     return res.status(400).json({
       success: false,
-      message: "User have not exists",
+      message: "User does not exist",
     });
   }
 
   const passwordCompare = await bcrypt.compare(password, user.password);
-
   if (!passwordCompare) {
     return res.status(400).json({
       success: false,
@@ -109,39 +110,55 @@ const login = async (req, res) => {
     });
   }
 
-  if (user.isVerified === false) {
+  if (!user.isVerified) {
     return res.status(400).json({
       success: false,
-      message: "Verify you account than login",
+      message: "Verify your account before login",
     });
   }
 
-  const accessToken = await jwt.sign({ id: user._id }, process.env.SECRET_KEY, {
-    expiresIn: "10d",
-  });
-  const refreshToken = await jwt.sign(
+  const accessToken = jwt.sign(
+    { id: user._id },
+    process.env.SECRET_KEY,
+    { expiresIn: "10d" }
+  );
+
+  const refreshToken = jwt.sign(
     { id: user._id },
     process.env.SECRET_KEY,
     { expiresIn: "20d" }
   );
 
   const existsSession = await Session.findOne({ UserId: user._id });
-
   if (existsSession) {
     await Session.deleteOne({ UserId: user._id });
   }
+
   user.isLoggedIn = true;
   await user.save();
   await Session.create({ UserId: user._id });
+
+  res
+    .cookie("accessToken", accessToken, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false, 
+      maxAge: 10 * 24 * 60 * 60 * 1000,
+    })
+    .cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false,
+      maxAge: 20 * 24 * 60 * 60 * 1000,
+    });
 
   return res.status(200).json({
     success: true,
     message: `Welcome back ${user.firstName}`,
     user,
-    accessToken,
-    refreshToken,
   });
 };
+
 
 const logout = async (req, res) => {
   const userId = req.id;
@@ -196,6 +213,13 @@ const verifyOtp = async (req, res) => {
       return res.status(200).json({
         success: true,
         message: "OTP verified successfully",
+      });
+    }
+    else
+    {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP or OTP expired",
       });
     }
   } catch (error) {

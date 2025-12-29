@@ -6,6 +6,9 @@ import Home from './pages/home'
 import { Toaster } from 'sonner'
 import Verify from './pages/Verify'
 import VerifyEmail from './pages/VerifyEmail'
+import ForgotPassword from './pages/ForgotPassword'
+import VerifyOtp from './pages/VerifyOtp'
+import ChangePassword from './pages/ChangePassword'
 
 const router=createBrowserRouter([
   {
@@ -27,6 +30,18 @@ const router=createBrowserRouter([
   {
     path:"/verify/:token",
     element:<VerifyEmail />
+  },
+  {
+    path:'/forgot-password',
+    element:<ForgotPassword />
+  },
+  {
+    path:'/verify-otp/:email',
+    element:<VerifyOtp />
+  },
+  {
+    path:'/change-password/:email',
+    element:<ChangePassword />
   }
 ])
 

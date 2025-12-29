@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
-import { Link , useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import axios from "axios";
 
@@ -82,9 +82,16 @@ const Login = () => {
               </div>
             </div>
             <div className="grid gap-2">
-              <div className="flex items-center">
+              <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-grey-600 hover:underline"
+                >
+                  Forgot password?
+                </Link>
               </div>
+
               <div className="relative">
                 <Input
                   id="password"
@@ -112,7 +119,7 @@ const Login = () => {
         </CardContent>
         <CardFooter className="flex-col gap-2">
           <Button type="submit" className="w-full" onClick={submitHandler}>
-            SignUp
+            Login
           </Button>
           <p>
             Don't have an account?{" "}
