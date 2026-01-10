@@ -9,6 +9,7 @@ import VerifyEmail from './pages/VerifyEmail'
 import ForgotPassword from './pages/ForgotPassword'
 import VerifyOtp from './pages/VerifyOtp'
 import ChangePassword from './pages/ChangePassword'
+import Profile from './pages/Profile'
 
 const router=createBrowserRouter([
   {
@@ -42,6 +43,10 @@ const router=createBrowserRouter([
   {
     path:'/change-password/:email',
     element:<ChangePassword />
+  },
+  {
+    path:'/updateProfile/:userId',
+    element:<Profile />
   }
 ])
 

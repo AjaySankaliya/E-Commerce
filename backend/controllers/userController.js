@@ -4,6 +4,8 @@ const jwt = require("jsonwebtoken");
 const verifyEmail = require("../services/emailVerify");
 const Session = require("../models/sessionModel");
 const sendOtpEmail = require("../services/sendOtpEmail");
+const cloudinary = require("../utils/cloudinary");
+const fs = require("fs");
 
 const register = async (req, res) => {
   try {
@@ -31,7 +33,7 @@ const register = async (req, res) => {
     });
 
     const token = await jwt.sign({ id: newUser._id }, process.env.SECRET_KEY, {
-      expiresIn: "10m",
+      expiresIn: "1h",
     });
     verifyEmail(token, email);
     newUser.token = token;
@@ -117,17 +119,13 @@ const login = async (req, res) => {
     });
   }
 
-  const accessToken = jwt.sign(
-    { id: user._id },
-    process.env.SECRET_KEY,
-    { expiresIn: "10d" }
-  );
+  const accessToken = jwt.sign({ id: user._id }, process.env.SECRET_KEY, {
+    expiresIn: "10d",
+  });
 
-  const refreshToken = jwt.sign(
-    { id: user._id },
-    process.env.SECRET_KEY,
-    { expiresIn: "20d" }
-  );
+  const refreshToken = jwt.sign({ id: user._id }, process.env.SECRET_KEY, {
+    expiresIn: "20d",
+  });
 
   const existsSession = await Session.findOne({ UserId: user._id });
   if (existsSession) {
@@ -142,7 +140,7 @@ const login = async (req, res) => {
     .cookie("accessToken", accessToken, {
       httpOnly: true,
       sameSite: "lax",
-      secure: false, 
+      secure: false,
       maxAge: 10 * 24 * 60 * 60 * 1000,
     })
     .cookie("refreshToken", refreshToken, {
@@ -155,19 +153,41 @@ const login = async (req, res) => {
   return res.status(200).json({
     success: true,
     message: `Welcome back ${user.firstName}`,
+    accessToken,
+    refreshToken,
     user,
   });
 };
 
-
 const logout = async (req, res) => {
-  const userId = req.id;
-  await Session.deleteMany({ UserId: userId });
-  await User.findByIdAndUpdate(userId, { isLoggedIn: false });
-  return res.status(200).json({
-    success: true,
-    message: "User logout successfully",
-  });
+  try {
+    const userId = req.id;
+    await Session.deleteMany({ UserId: userId });
+    await User.findByIdAndUpdate(userId, { isLoggedIn: false });
+
+    res
+      .clearCookie("accessToken", {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false,
+      })
+      .clearCookie("refreshToken", {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false,
+      });
+
+    return res.status(200).json({
+      success: true,
+      message: "User logout successfully",
+    });
+  } catch (error) {
+    console.log("Logout error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
 };
 
 const forgotPassword = async (req, res) => {
@@ -214,9 +234,7 @@ const verifyOtp = async (req, res) => {
         success: true,
         message: "OTP verified successfully",
       });
-    }
-    else
-    {
+    } else {
       return res.status(400).json({
         success: false,
         message: "Invalid OTP or OTP expired",
@@ -288,6 +306,77 @@ const getAllUser = async (req, res) => {
   }
 };
 
+const updateUserProfile = async (req, res) => {
+  try {
+    const updatedUserId = req.params.userId;
+    const loggedInUser = req.user;
+
+    const { firstName, lastName, phoneNo, address, city, zipCode } = req.body;
+
+    if (
+      loggedInUser._id.toString() !== updatedUserId.toString() &&
+      loggedInUser.role !== "admin"
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to update this profile",
+      });
+    }
+
+    const user = await User.findById(updatedUserId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    let profilePic = user.profilePic;
+    let profilePicPublicId = user.profilePicPublicId;
+
+    if (req.file) {
+      if (profilePicPublicId) {
+        await cloudinary.uploader.destroy(profilePicPublicId);
+      }
+
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "profile",
+      });
+
+      profilePic = result.secure_url;
+      profilePicPublicId = result.public_id;
+
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+    }
+
+    user.firstName = firstName || user.firstName;
+    user.lastName = lastName || user.lastName;
+    user.phoneNo = phoneNo || user.phoneNo;
+    user.address = address || user.address;
+    user.city = city || user.city;
+    user.zipCode = zipCode || user.zipCode;
+    user.profilePic = profilePic;
+    user.profilePicPublicId = profilePicPublicId;
+
+    const updatedUser = await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "User profile updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server error",
+      err: error.message,
+    });
+  }
+};
 
 module.exports = {
   register,
@@ -298,4 +387,5 @@ module.exports = {
   verifyOtp,
   changePassword,
   getAllUser,
+  updateUserProfile,
 };
