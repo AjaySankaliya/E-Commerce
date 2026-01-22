@@ -10,6 +10,8 @@ import ForgotPassword from './pages/ForgotPassword'
 import VerifyOtp from './pages/VerifyOtp'
 import ChangePassword from './pages/ChangePassword'
 import Profile from './pages/Profile'
+import Products from './pages/Products'
+import Navbar from './components/Navbar'
 
 const router=createBrowserRouter([
   {
@@ -47,6 +49,10 @@ const router=createBrowserRouter([
   {
     path:'/updateProfile/:userId',
     element:<Profile />
+  },
+  {
+    path:'/products',
+    element:<><Navbar /><Products /></>
   }
 ])
 

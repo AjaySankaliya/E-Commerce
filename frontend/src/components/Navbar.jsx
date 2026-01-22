@@ -54,9 +54,6 @@ const Navbar = () => {
           <Link to="/products" className="hover:text-blue-600 transition">
             Products
           </Link>
-          <Link to="/products" className="hover:text-blue-600 transition">
-            Smartphones
-          </Link>
           {user && (
             <><Link to={`/updateProfile/${user._id}`} className="hover:text-blue-600 transition">
               My Account

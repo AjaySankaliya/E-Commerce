@@ -3,6 +3,7 @@ const app = express();
 require("dotenv").config();
 const db = require("./config/db");
 const userRouter = require("./routers/userRouter");
+const productRouter=require('./routers/productRouter')
 const cors = require("cors");
 
 db();
@@ -13,6 +14,7 @@ app.use(cors({
   credentials: true,
 }));
 app.use("/auth", userRouter);
+app.use('/product',productRouter)
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {

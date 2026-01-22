@@ -3,7 +3,7 @@ import { cloneElement } from "react";
 
 const Features = () => {
   const data = [
-    { icon: <Truck />, title: "Express Delivery", desc: "Free shipping on orders over $500", color: "text-blue-600" },
+    { icon: <Truck />, title: "Express Delivery", desc: "Free shipping on orders over 5000", color: "text-blue-600" },
     { icon: <ShieldCheck />, title: "2 Year Warranty", desc: "Certified brand protection", color: "text-green-600" },
     { icon: <Zap />, title: "Instant Setup", desc: "Expert technical assistance", color: "text-amber-500" },
   ];

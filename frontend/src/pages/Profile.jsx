@@ -42,10 +42,6 @@ const Profile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(userId);
-    console.log(updatedUser);
-    console.log(file);
-
     const accessToken = localStorage.getItem("accessToken");
 
     try {

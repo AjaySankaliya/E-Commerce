@@ -2,6 +2,8 @@ const multer=require('multer');
 
 const storage=multer.diskStorage({});
 
-const upload=multer({storage}).single("profilePic");
+const singleUpload=multer({storage}).single("profilePic");
 
-module.exports=upload;
+const multipleUpload=multer({storage}).array("productImg",5)
+
+module.exports={singleUpload,multipleUpload};
