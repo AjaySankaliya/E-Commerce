@@ -13,30 +13,76 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { LayoutGrid, ListFilter } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { setProduct } from "@/redux/productSlice";
 
 const Products = () => {
   const [allProduct, setAllProduct] = useState([]);
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("All");
+  const [brand, setBrand] = useState("All");
+  const [sortOrder,setSortOrder]=useState('');
 
+  const { products } = useSelector((store) => store.product);
+  const dispatch = useDispatch();
+
+  // 🔹 Fetch all products
   useEffect(() => {
     const getAllProduct = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:3001/product/get-products",
+          "http://localhost:3001/product/get-products"
         );
+
         if (res.data.success) {
           setAllProduct(res.data.products);
+          dispatch(setProduct(res.data.products)); 
         }
       } catch (error) {
         console.error(error);
         toast.error("Failed to fetch products");
       }
     };
+
     getAllProduct();
-  }, []);
+  }, [dispatch]);
+
+ 
+  useEffect(() => {
+    if (allProduct.length === 0) return;
+
+    let filtered = [...allProduct];
+
+    
+    if (search.trim() !== "") {
+      filtered = filtered.filter((p) =>
+        p.productName?.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+    
+    if (category !== "All") {
+      filtered = filtered.filter((p) => p.category === category);
+    }
+
+    if (brand !== "All") {
+      filtered = filtered.filter((p) => p.brand === brand);
+    }
+
+    if(sortOrder==="low-high")
+    {
+      filtered.sort((a,b)=>a.productPrice-b.productPrice)
+    }else if(sortOrder==="high-low")
+    {
+      filtered.sort((a,b)=>b.productPrice-a.productPrice)
+    }
+
+    dispatch(setProduct(filtered));
+  }, [search, category, brand,sortOrder, allProduct, dispatch]);
 
   return (
     <div className="pt-28 pb-20 bg-slate-50 min-h-screen font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row gap-8">
+        
         {/* Sidebar */}
         <aside className="w-full md:w-64 shrink-0">
           <div className="sticky top-28 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
@@ -46,72 +92,62 @@ const Products = () => {
                 Filters
               </h2>
             </div>
-            <FilterSideBar />
+
+            <FilterSideBar
+              allProduct={allProduct}
+              search={search}
+              setSearch={setSearch}
+              category={category}
+              setCategory={setCategory}
+              brand={brand}
+              setBrand={setBrand}
+            />
           </div>
         </aside>
 
         {/* Main Section */}
         <div className="flex flex-col flex-1">
-          {/* Header & Controls */}
+          
+          {/* Header */}
           <div className="bg-white p-4 rounded-2xl border border-slate-200 mb-8 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-sm">
-            <div className="flex items-center gap-4">
-              <h1 className="text-xl font-extrabold text-slate-900">
-                Electronics{" "}
-                <span className="text-slate-400 font-medium text-sm">
-                  ({allProduct.length})
-                </span>
-              </h1>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="hidden lg:inline text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                Sort By
+            <h1 className="text-xl font-extrabold text-slate-900">
+              Electronics{" "}
+              <span className="text-slate-400 font-medium text-sm">
+                ({products.length})
               </span>
-              <Select defaultValue="featured">
-                <SelectTrigger className="w-52 bg-slate-50 border-slate-200 rounded-xl py-5 focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition font-semibold text-slate-700">
-                  <SelectValue placeholder="Sort Products" />
-                </SelectTrigger>
+            </h1>
 
-                <SelectContent className="bg-white border-slate-200 rounded-xl shadow-2xl">
+            <Select onValueChange={(value)=>setSortOrder(value)}>
+              <SelectTrigger className="w-52 bg-slate-50 border-slate-200 rounded-xl py-5">
+                <SelectValue placeholder="Sort Products" />
+              </SelectTrigger>
 
-                  {/* Meaningful Price Labels */}
-                  <SelectGroup>
-                    <div className="h-px bg-slate-100 my-1" />{" "}
-                    {/* Visual Divider */}
-                    <SelectLabel className="text-[10px] font-bold text-slate-400 uppercase p-3 tracking-widest">
-                      Price Range
-                    </SelectLabel>
-                    <SelectItem
-                      value="low-high"
-                      className="py-2.5 cursor-pointer"
-                    >
-                      Price: Low to High
-                    </SelectItem>
-                    <SelectItem
-                      value="high-low"
-                      className="py-2.5 cursor-pointer"
-                    >
-                      Price: High to Low
-                    </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Price Range</SelectLabel>
+                  <SelectItem value="low-high">
+                    Price: Low to High
+                  </SelectItem>
+                  <SelectItem value="high-low">
+                    Price: High to Low
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
 
-          {/* Grid: 4 columns on large screens for a high-end feel */}
-          {allProduct.length > 0 ? (
+          {/* Products Grid */}
+          {products.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {allProduct.map((product) => (
+              {products.map((product) => (
                 <ProductCard key={product._id} product={product} />
               ))}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-dashed border-slate-300">
-              <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                <LayoutGrid className="text-slate-300" />
-              </div>
+              <LayoutGrid className="text-slate-300 mb-4" size={40} />
               <p className="text-slate-500 font-medium">
-                No products found in this category.
+                No products found
               </p>
             </div>
           )}

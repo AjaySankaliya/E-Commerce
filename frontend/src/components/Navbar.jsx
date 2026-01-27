@@ -80,12 +80,8 @@ const Navbar = () => {
           </Link>
 
           {user ? (
-            <Button
-              onClick={logoutHandler}
-              variant="ghost"
-              className="flex gap-2 items-center text-slate-600 font-semibold"
-            >
-              <LogOut size={18} />{" "}
+            <Button onClick={logoutHandler}>
+              <LogOut size={18} />
               <span className="hidden sm:inline">Logout</span>
             </Button>
           ) : (
