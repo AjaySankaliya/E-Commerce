@@ -8,9 +8,11 @@ import { setUser } from "@/redux/userSlice";
 
 const Navbar = () => {
   const {user} = useSelector((state)=>state.user);
+  const {cart} = useSelector((state)=>state.product)
   const navigate=useNavigate();
   const accessToken=localStorage.getItem('accessToken')
   const dispatch=useDispatch();
+  const cartCount = cart?.items?.length || 0;
 
   const logoutHandler=async()=>{
     try {
@@ -75,7 +77,7 @@ const Navbar = () => {
             <ShoppingCart size={24} />
 
             <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full border-2 border-white">
-              0
+              {cartCount}
             </span>
           </Link>
 

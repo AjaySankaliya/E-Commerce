@@ -1,8 +1,38 @@
-import React from "react";
+import React, { useState } from "react";
 import { ShoppingCart } from "lucide-react";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { setCart } from "@/redux/productSlice";   // ← your existing slice
+import { toast } from "sonner";
 
 const ProductCard = ({ product }) => {
-  const { productName, productImg, productPrice } = product;
+  const { productName, productImg, productPrice, _id } = product;
+  const dispatch = useDispatch();
+  const [adding, setAdding] = useState(false);
+
+  const handleAddToCart = async () => {
+    setAdding(true);
+    try {
+      const token = localStorage.getItem("accessToken");
+      const res = await axios.post(
+        "http://localhost:3001/cart/add-to-cart",
+        { productId: _id },
+        {
+          headers: {
+          Authorization: `${token}`,
+          },
+          withCredentials: true }
+      );
+      if (res.data.success) {
+        dispatch(setCart(res.data.cart));
+        toast.success(`${productName} added to cart!`);
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to add to cart");
+    } finally {
+      setAdding(false);
+    }
+  };
 
   return (
     <div className="group bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-500 flex flex-col h-full">
@@ -22,9 +52,13 @@ const ProductCard = ({ product }) => {
           </span>
         </div>
 
-        {/* Hover Actions */}
+        {/* Hover Action — now functional */}
         <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <button className="p-3 bg-white rounded-full text-slate-900 hover:bg-blue-600 hover:text-white transition-colors shadow-lg">
+          <button
+            onClick={handleAddToCart}
+            disabled={adding}
+            className="p-3 bg-white rounded-full text-slate-900 hover:bg-blue-600 hover:text-white transition-colors shadow-lg disabled:opacity-50"
+          >
             <ShoppingCart size={18} />
           </button>
         </div>
@@ -39,10 +73,10 @@ const ProductCard = ({ product }) => {
         <div className="mt-auto flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-xs text-slate-400 line-through">
-              {(productPrice * 1.2).toFixed(2)}
+              ₹{(productPrice * 1.2).toFixed(2)}
             </span>
             <span className="text-lg font-extrabold text-slate-900">
-              {productPrice}
+              ₹{productPrice}
             </span>
           </div>
 

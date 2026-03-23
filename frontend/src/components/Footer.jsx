@@ -93,18 +93,10 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar: Payments & Copyright */}
-        <div className="pt-8 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="pt-8 border-t border-slate-900 flex flex-col md:flex-row justify-center items-center gap-6">
           <p className="text-xs text-slate-500">
             &copy; {new Date().getFullYear()} Nexal Electronics Inc. All rights reserved.
           </p>
-          
-          <div className="flex items-center gap-4 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all">
-             {/* Replace these with actual payment SVG icons if available */}
-             <span className="text-[10px] font-bold border border-slate-700 px-2 py-1 rounded">VISA</span>
-             <span className="text-[10px] font-bold border border-slate-700 px-2 py-1 rounded">MASTERCARD</span>
-             <span className="text-[10px] font-bold border border-slate-700 px-2 py-1 rounded">PAYPAL</span>
-             <span className="text-[10px] font-bold border border-slate-700 px-2 py-1 rounded">APPLE PAY</span>
-          </div>
         </div>
       </div>
     </footer>

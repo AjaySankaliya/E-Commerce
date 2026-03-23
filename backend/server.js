@@ -5,6 +5,7 @@ const db = require("./config/db");
 const userRouter = require("./routers/userRouter");
 const productRouter=require('./routers/productRouter')
 const cors = require("cors");
+const cartRoutes = require('./routers/cartRouter');
 
 db();
 
@@ -15,6 +16,7 @@ app.use(cors({
 }));
 app.use("/auth", userRouter);
 app.use('/product',productRouter)
+app.use('/cart', cartRoutes);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
