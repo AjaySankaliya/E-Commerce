@@ -1,7 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Package, Camera } from "lucide-react";
-import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
 import userLogo from "../assets/userLogo.webp";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
@@ -25,6 +25,29 @@ const Profile = () => {
     profilePic: user?.profilePic,
     profilePicPublicId: user?.profilePicPublicId,
   });
+  const [orders, setOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      setLoadingOrders(true);
+      try {
+        const token = localStorage.getItem("accessToken");
+        const res = await axios.get("http://localhost:3001/payment/my-orders", {
+          headers: { Authorization: token },
+          withCredentials: true
+        });
+        if (res.data.success) {
+          setOrders(res.data.orders);
+        }
+      } catch (err) {
+        console.error("Failed to fetch orders:");
+      } finally {
+        setLoadingOrders(false);
+      }
+    };
+    fetchOrders();
+  }, []);
 
   const handleChange = (e) => {
     setUpdatedUser({ ...updatedUser, [e.target.name]: e.target.value });
@@ -274,18 +297,60 @@ const Profile = () => {
 
         {/* ORDERS TAB */}
         <TabsContent value="orders" className="focus-visible:outline-none">
-          <div className="bg-white p-12 rounded-3xl border border-slate-200 shadow-sm text-center">
-            <div className="bg-slate-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Package size={32} className="text-slate-300" />
+          {loadingOrders ? (
+            <div className="flex justify-center p-12">
+               <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
             </div>
-            <h2 className="text-2xl font-bold text-slate-900">No Orders Yet</h2>
-            <p className="text-slate-500 mt-2 max-w-xs mx-auto">
-              Looks like you haven't made any tech purchases recently.
-            </p>
-            <button className="mt-8 bg-slate-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-600 transition cursor-pointer">
-              Start Shopping
-            </button>
-          </div>
+          ) : orders.length === 0 ? (
+            <div className="bg-white p-12 rounded-3xl border border-slate-200 shadow-sm text-center">
+              <div className="bg-slate-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Package size={32} className="text-slate-300" />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900">No Orders Yet</h2>
+              <p className="text-slate-500 mt-2 max-w-xs mx-auto">
+                Looks like you haven't made any tech purchases recently.
+              </p>
+              <Link to="/products" className="mt-8 inline-block bg-slate-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-600 transition cursor-pointer">
+                Start Shopping
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-6 max-w-3xl mx-auto">
+              {orders.map((order) => (
+                <div key={order._id} className="bg-white border text-left border-slate-200 rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex flex-wrap justify-between items-center mb-6 border-b border-slate-100 pb-4 gap-4">
+                    <div>
+                      <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Order #{order.paymentId === 'COD' ? order._id.substring(order._id.length - 8) : order.paymentId}</p>
+                      <p className="text-sm text-slate-700 font-medium">{new Date(order.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    </div>
+                    <div className="text-right flex flex-col items-end">
+                      <span className={`px-4 py-1.5 text-xs font-bold rounded-full uppercase tracking-wide inline-flex items-center gap-1.5 ${order.status === 'Processing' ? 'bg-amber-100 text-amber-700' : order.status === 'Delivered' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${order.status === 'Processing' ? 'bg-amber-500' : order.status === 'Delivered' ? 'bg-green-500' : 'bg-blue-500'}`}></span>
+                        {order.status}
+                      </span>
+                      <p className="font-extrabold text-slate-900 text-lg mt-3">₹{order.totalAmount.toLocaleString('en-IN')}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    {order.items.map((item, idx) => (
+                      <div key={idx} className="flex gap-4 items-center bg-slate-50 rounded-2xl p-3">
+                        <div className="w-16 h-16 bg-white rounded-xl overflow-hidden shrink-0 border border-slate-100 p-1">
+                           <img src={item.productId?.productImg?.[0]?.url || 'https://via.placeholder.com/150'} className="w-full h-full object-cover rounded-lg" alt="product" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-bold text-slate-800 line-clamp-1">{item.productId?.productName || "Product no longer available"}</p>
+                          <div className="flex gap-3 mt-1">
+                            <p className="text-xs text-slate-500 font-medium bg-white px-2 py-0.5 rounded-md border border-slate-200 shadow-sm">Qty: {item.quantity}</p>
+                            <p className="text-xs text-slate-500 font-medium bg-white px-2 py-0.5 rounded-md border border-slate-200 shadow-sm">₹{item.price.toLocaleString('en-IN')}/ea</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

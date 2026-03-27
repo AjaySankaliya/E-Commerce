@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Heart } from "lucide-react";
 import axios from "axios";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setCart } from "@/redux/productSlice";   // ← your existing slice
 import { toast } from "sonner";
 
@@ -9,6 +9,33 @@ const ProductCard = ({ product }) => {
   const { productName, productImg, productPrice, _id } = product;
   const dispatch = useDispatch();
   const [adding, setAdding] = useState(false);
+  const { wishlists } = useSelector(store => store.wishlist);
+  const isWishlisted = wishlists && wishlists.some(item => (item._id || item) === _id);
+
+  const handleWishlist = async (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (isWishlisted) {
+        await axios.delete(`http://localhost:3001/wishlist/${_id}`, {
+          headers: { Authorization: token },
+          withCredentials: true
+        });
+        dispatch({ type: "Wishlist/removeFromWishlistState", payload: _id });
+        toast.info("Removed from wishlist");
+      } else {
+        await axios.post(`http://localhost:3001/wishlist/${_id}`, {}, {
+          headers: { Authorization: token },
+          withCredentials: true
+        });
+        dispatch({ type: "Wishlist/addToWishlistState", payload: product });
+        toast.success("Added to wishlist");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Please login first");
+    }
+  };
 
   const handleAddToCart = async () => {
     setAdding(true);
@@ -45,11 +72,17 @@ const ProductCard = ({ product }) => {
           className="max-h-full max-w-full object-contain transition-transform duration-700 group-hover:scale-105"
         />
 
-        {/* Badge */}
-        <div className="absolute top-3 left-3">
-          <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">
+        {/* Badge and Wishlist Heart */}
+        <div className="absolute top-3 w-full px-3 flex justify-between items-start">
+          <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider shadow-sm">
             New
           </span>
+          <button 
+            onClick={handleWishlist}
+            className={`p-2 rounded-full transition-colors shadow-md z-10 ${isWishlisted ? 'bg-red-50 text-red-500 hover:bg-red-100' : 'bg-white text-slate-400 hover:text-red-500 hover:bg-slate-50'}`}
+          >
+            <Heart size={16} fill={isWishlisted ? "currentColor" : "none"} />
+          </button>
         </div>
 
         {/* Hover Action — now functional */}

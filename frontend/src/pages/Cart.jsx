@@ -306,9 +306,9 @@ const Cart = () => {
                 </span>
               </div>
 
-              <button className="mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-colors text-sm tracking-wide">
+              <Link to="/shipping" className="mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-colors text-sm tracking-wide block text-center">
                 Proceed to Checkout
-              </button>
+              </Link>
 
               <p className="text-xs text-slate-400 text-center mt-3">
                 🔒 Secure checkout — SSL encrypted

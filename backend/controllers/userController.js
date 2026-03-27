@@ -13,13 +13,13 @@ const register = async (req, res) => {
     if (!firstName || !lastName || !email || !password) {
       return res
         .status(400)
-        .json({ success: false, message: "All field are required" });
+        .json({ success: false, message: "All fields are required" });
     }
     const user = await User.findOne({ email });
     if (user) {
-      return res.status(400).json({
+      return res.status(409).json({
         success: false,
-        message: "User have already register",
+        message: "User already exists. Please login instead.",
       });
     }
 
@@ -40,7 +40,7 @@ const register = async (req, res) => {
     await newUser.save();
     return res.status(201).json({
       success: true,
-      message: "User register successfully",
+      message: "User registered successfully. Please verify your email.",
       newUser,
     });
   } catch (error) {
@@ -58,7 +58,7 @@ const verify = async (req, res) => {
   if (!auth) {
     return res.status(401).json({
       success: false,
-      message: "token is invalid or expired",
+      message: "Token is invalid or expired",
     });
   }
   try {
@@ -106,16 +106,16 @@ const login = async (req, res) => {
 
   const passwordCompare = await bcrypt.compare(password, user.password);
   if (!passwordCompare) {
-    return res.status(400).json({
+    return res.status(401).json({
       success: false,
       message: "Invalid email or password",
     });
   }
 
   if (!user.isVerified) {
-    return res.status(400).json({
+    return res.status(403).json({
       success: false,
-      message: "Verify your account before login",
+      message: "Please verify your account before logging in",
     });
   }
 
@@ -196,7 +196,7 @@ const forgotPassword = async (req, res) => {
   if (!user) {
     return res.status(404).json({
       success: false,
-      message: "user have not found",
+      message: "User not found",
     });
   }
 
@@ -223,7 +223,7 @@ const verifyOtp = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "user have not found",
+        message: "User not found",
       });
     }
     if (user.otp === otp && user.otpExpiry > Date.now()) {
@@ -257,19 +257,19 @@ const changePassword = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "user have not found",
+        message: "User not found",
       });
     }
     if (!newPassword || !confirmNewPassword) {
       return res.status(400).json({
         success: false,
-        message: "All field are required",
+        message: "All fields are required",
       });
     }
     if (newPassword !== confirmNewPassword) {
       return res.status(400).json({
         success: false,
-        message: "New password and confirm new password must be same",
+        message: "Passwords do not match",
       });
     }
     const hashedPassword = await bcrypt.hash(newPassword, 10);

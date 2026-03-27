@@ -6,6 +6,9 @@ const userRouter = require("./routers/userRouter");
 const productRouter=require('./routers/productRouter')
 const cors = require("cors");
 const cartRoutes = require('./routers/cartRouter');
+const wishlistRoutes = require('./routers/wishlistRouter');
+const paymentRoutes = require('./routers/paymentRouter');
+const adminRoutes = require('./routers/adminRouter');
 
 db();
 
@@ -15,8 +18,11 @@ app.use(cors({
   credentials: true,
 }));
 app.use("/auth", userRouter);
-app.use('/product',productRouter)
+app.use('/product',productRouter);
 app.use('/cart', cartRoutes);
+app.use('/wishlist', wishlistRoutes);
+app.use('/payment', paymentRoutes);
+app.use('/admin', adminRoutes);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {

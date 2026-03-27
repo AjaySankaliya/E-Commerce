@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { ShoppingCart, Search, LogOut } from "lucide-react";
+import { ShoppingCart, Search, LogOut, Heart } from "lucide-react";
 import { Button } from "./ui/button";
 import axios from "axios";
 import { toast } from "sonner";
@@ -66,9 +66,25 @@ const Navbar = () => {
 
         {/* Action Icons */}
         <div className="flex items-center gap-5">
+          {user?.role === 'admin' && (
+            <Link
+              to="/admin/dashboard"
+              className="hidden md:block text-blue-600 font-bold bg-blue-50 px-4 py-2 rounded-xl transition hover:bg-blue-100"
+            >
+              Admin Panel
+            </Link>
+          )}
+
           <button className="text-slate-600 hover:text-blue-600 hidden sm:block">
             <Search size={22} />
           </button>
+
+          <Link
+            to="/wishlist"
+            className="text-slate-700 hover:text-red-500 transition"
+          >
+            <Heart size={24} />
+          </Link>
 
           <Link
             to="/cart"

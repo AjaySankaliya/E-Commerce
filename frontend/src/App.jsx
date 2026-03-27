@@ -13,6 +13,14 @@ import Profile from './pages/Profile'
 import Products from './pages/Products'
 import Navbar from './components/Navbar'
 import Cart from './pages/Cart'
+import Wishlist from './pages/Wishlist'
+import Checkout from './pages/Checkout'
+import ShippingAddress from './pages/ShippingAddress'
+import PaymentMethod from './pages/PaymentMethod'
+import AdminLayout from './pages/Admin/AdminLayout'
+import Dashboard from './pages/Admin/Dashboard'
+import Users from './pages/Admin/Users'
+import AdminOrders from './pages/Admin/Orders'
 
 const router=createBrowserRouter([
   {
@@ -58,6 +66,31 @@ const router=createBrowserRouter([
   {
     path:'/cart',
     element:<><Navbar /><Cart /></>
+  },
+  {
+    path: '/wishlist',
+    element: <><Navbar /><Wishlist /></>
+  },
+  {
+    path: '/checkout',
+    element: <><Navbar /><Checkout /></>
+  },
+  {
+    path: '/shipping',
+    element: <><Navbar /><ShippingAddress /></>
+  },
+  {
+    path: '/payment-method',
+    element: <><Navbar /><PaymentMethod /></>
+  },
+  {
+    path: '/admin',
+    element: <AdminLayout />,
+    children: [
+      { path: 'dashboard', element: <Dashboard /> },
+      { path: 'users', element: <Users /> },
+      { path: 'orders', element: <AdminOrders /> }
+    ]
   }
 ])
 
