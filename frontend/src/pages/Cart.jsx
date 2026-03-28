@@ -23,7 +23,7 @@ const Cart = () => {
     const fetchCart = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:3001/cart/get-cart",
+          `${import.meta.env.VITE_API_URL}/cart/get-cart`,
           getAuthConfig()   // ✅ direct — NOT { authConfig }
         );
         if (res.data.success) dispatch(setCart(res.data.cart));
@@ -44,7 +44,7 @@ const Cart = () => {
     setUpdatingId(productId);
     try {
       const res = await axios.put(
-        "http://localhost:3001/cart/update-cart",
+        `${import.meta.env.VITE_API_URL}/cart/update-cart`,
         { productId, quantity: newQty },
         getAuthConfig()   // ✅ correct
       );
@@ -61,7 +61,7 @@ const Cart = () => {
     setUpdatingId(productId);
     try {
       const res = await axios.delete(
-        `http://localhost:3001/cart/remove-item/${productId}`,
+        `${import.meta.env.VITE_API_URL}/cart/remove-item/${productId}`,
         getAuthConfig()   // ✅ correct
       );
       if (res.data.success) {
@@ -79,7 +79,7 @@ const Cart = () => {
   const handleClearCart = async () => {
     try {
       const res = await axios.delete(
-        "http://localhost:3001/cart/clear-cart",
+        `${import.meta.env.VITE_API_URL}/cart/clear-cart`,
         getAuthConfig()   // ✅ direct — NOT { authConfig }
       );
       if (res.data.success) {

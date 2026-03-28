@@ -39,7 +39,7 @@ const Checkout = () => {
       
       if (paymentMethod === "COD") {
         // Handle COD directly
-        const verifyRes = await axios.post("http://localhost:3001/payment/verify", {
+        const verifyRes = await axios.post(`${import.meta.env.VITE_API_URL}/payment/verify`, {
           paymentId: "COD",
           items: items.map(p => ({ productId: p.productId._id, quantity: p.quantity, price: p.price })),
           totalAmount,
@@ -59,7 +59,7 @@ const Checkout = () => {
         }
       } else {
         // 1. Create Mock Razorpay Order
-        const orderRes = await axios.post("http://localhost:3001/payment/checkout", { amount: totalAmount }, {
+        const orderRes = await axios.post(`${import.meta.env.VITE_API_URL}/payment/checkout`, { amount: totalAmount }, {
           headers: { Authorization: token },
           withCredentials: true
         });
@@ -81,7 +81,7 @@ const Checkout = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("accessToken");
-      const verifyRes = await axios.post("http://localhost:3001/payment/verify", {
+      const verifyRes = await axios.post(`${import.meta.env.VITE_API_URL}/payment/verify`, {
         paymentId: mockPaymentId,
         items: items.map(p => ({ productId: p.productId._id, quantity: p.quantity, price: p.price })),
         totalAmount,

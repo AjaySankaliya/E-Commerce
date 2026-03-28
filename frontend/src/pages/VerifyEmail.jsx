@@ -14,7 +14,7 @@ const VerifyEmail = () => {
     const verifyEmail = async () => {
       try {
         const res = await axios.post(
-          "http://localhost:3001/auth/verify",
+          `${import.meta.env.VITE_API_URL}/auth/verify`,
           {},
           {
             headers: {

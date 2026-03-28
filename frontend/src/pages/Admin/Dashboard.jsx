@@ -44,7 +44,7 @@ const Dashboard = () => {
     const fetchStats = async () => {
       try {
         const token = localStorage.getItem("accessToken");
-        const res = await axios.get("http://localhost:3001/admin/stats", {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/stats`, {
           headers: { Authorization: token },
           withCredentials: true
         });

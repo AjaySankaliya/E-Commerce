@@ -14,7 +14,7 @@ const Wishlist = () => {
     const fetchWishlist = async () => {
       try {
         const token = localStorage.getItem("accessToken");
-        const res = await axios.get("http://localhost:3001/wishlist", {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/wishlist`, {
           headers: { Authorization: token },
           withCredentials: true
         });

@@ -8,7 +8,7 @@ const Orders = () => {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("accessToken");
-      const res = await axios.get("http://localhost:3001/admin/orders", {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/orders`, {
         headers: { Authorization: token },
         withCredentials: true
       });
@@ -27,7 +27,7 @@ const Orders = () => {
   const handleStatusChange = async (orderId, newStatus) => {
     try {
       const token = localStorage.getItem("accessToken");
-      const res = await axios.put(`http://localhost:3001/admin/orders/${orderId}`, { status: newStatus }, {
+      const res = await axios.put(`${import.meta.env.VITE_API_URL}/admin/orders/${orderId}`, { status: newStatus }, {
         headers: { Authorization: token },
         withCredentials: true
       });

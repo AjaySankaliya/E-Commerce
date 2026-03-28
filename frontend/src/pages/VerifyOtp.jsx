@@ -20,7 +20,7 @@ const VerifyOtp = () => {
 
     try {
       const res = await axios.post(
-        `http://localhost:3001/auth/verify-otp/${email}`,
+        `${import.meta.env.VITE_API_URL}/auth/verify-otp/${email}`,
         { otp : otp.trim() }
       );
 

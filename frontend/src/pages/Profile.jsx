@@ -33,7 +33,7 @@ const Profile = () => {
       setLoadingOrders(true);
       try {
         const token = localStorage.getItem("accessToken");
-        const res = await axios.get("http://localhost:3001/payment/my-orders", {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/payment/my-orders`, {
           headers: { Authorization: token },
           withCredentials: true
         });
@@ -82,7 +82,7 @@ const Profile = () => {
       }
 
       const res = await axios.put(
-        `http://localhost:3001/auth/updateProfile/${userId}`,
+        `${import.meta.env.VITE_API_URL}/auth/updateProfile/${userId}`,
         formData,
         {
           headers: {

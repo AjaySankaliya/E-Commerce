@@ -18,14 +18,14 @@ const ProductCard = ({ product }) => {
     try {
       const token = localStorage.getItem("accessToken");
       if (isWishlisted) {
-        await axios.delete(`http://localhost:3001/wishlist/${_id}`, {
+        await axios.delete(`${import.meta.env.VITE_API_URL}/wishlist/${_id}`, {
           headers: { Authorization: token },
           withCredentials: true
         });
         dispatch({ type: "Wishlist/removeFromWishlistState", payload: _id });
         toast.info("Removed from wishlist");
       } else {
-        await axios.post(`http://localhost:3001/wishlist/${_id}`, {}, {
+        await axios.post(`${import.meta.env.VITE_API_URL}/wishlist/${_id}`, {}, {
           headers: { Authorization: token },
           withCredentials: true
         });
@@ -42,7 +42,7 @@ const ProductCard = ({ product }) => {
     try {
       const token = localStorage.getItem("accessToken");
       const res = await axios.post(
-        "http://localhost:3001/cart/add-to-cart",
+        `${import.meta.env.VITE_API_URL}/cart/add-to-cart`,
         { productId: _id },
         {
           headers: {
