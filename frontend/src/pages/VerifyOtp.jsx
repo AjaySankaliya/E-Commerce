@@ -21,7 +21,7 @@ const VerifyOtp = () => {
     try {
       const res = await axios.post(
         `http://localhost:3001/auth/verify-otp/${email}`,
-        { otp }
+        { otp : otp.trim() }
       );
 
       if (res.data.success) {
