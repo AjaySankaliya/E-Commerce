@@ -21,6 +21,7 @@ import AdminLayout from './pages/Admin/AdminLayout'
 import Dashboard from './pages/Admin/Dashboard'
 import Users from './pages/Admin/Users'
 import AdminOrders from './pages/Admin/Orders'
+import ProductDetail from './pages/ProductDetail'
 
 const router=createBrowserRouter([
   {
@@ -62,6 +63,10 @@ const router=createBrowserRouter([
   {
     path:'/products',
     element:<><Navbar /><Products /></>
+  },
+  {
+    path:'/product/:id',
+    element:<><Navbar/><ProductDetail /></>
   },
   {
     path:'/cart',

@@ -167,4 +167,35 @@ const updateProduct = async (req, res) => {
   }
 };
 
-module.exports = { addProduct, getAllProduct, deleteProduct, updateProduct };
+const getProductById = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      product,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      err: error.message,
+    });
+  }
+};
+
+module.exports = { 
+  addProduct, 
+  getAllProduct, 
+  deleteProduct, 
+  updateProduct,
+  getProductById 
+};

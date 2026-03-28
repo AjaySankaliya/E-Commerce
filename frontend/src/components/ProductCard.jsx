@@ -1,20 +1,27 @@
 import React, { useState } from "react";
-import { ShoppingCart, Heart } from "lucide-react";
+import { ShoppingCart, Heart, Plus, Minus, Loader2 } from "lucide-react";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { setCart } from "@/redux/productSlice";   // ← your existing slice
+import { setCart } from "@/redux/productSlice"; 
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const ProductCard = ({ product }) => {
   const { productName, productImg, productPrice, _id } = product;
   const dispatch = useDispatch();
-  const [adding, setAdding] = useState(false);
-  const { wishlists } = useSelector(store => store.wishlist);
-  const isWishlisted = wishlists && wishlists.some(item => (item._id || item) === _id);
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  
+  const { cart } = useSelector((store) => store.product);
+  const { wishlists } = useSelector((store) => store.wishlist);
+  const isWishlisted = wishlists && wishlists.some((item) => (item._id || item) === _id);
+
+  // Check if item is in cart and get its quantity
+  const cartItem = cart?.items?.find((item) => (item.productId._id || item.productId) === _id);
+  const quantity = cartItem ? cartItem.quantity : 0;
 
   const handleWishlist = async (e) => {
     e.stopPropagation();
-    e.preventDefault();
     try {
       const token = localStorage.getItem("accessToken");
       if (isWishlisted) {
@@ -33,39 +40,82 @@ const ProductCard = ({ product }) => {
         toast.success("Added to wishlist");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Please login first");
+      toast.error("Please login first");
     }
   };
 
-  const handleAddToCart = async () => {
-    setAdding(true);
+  const handleAddToCart = async (e) => {
+    e.stopPropagation();
+    setLoading(true);
     try {
       const token = localStorage.getItem("accessToken");
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/cart/add-to-cart`,
         { productId: _id },
         {
-          headers: {
-          Authorization: `${token}`,
-          },
-          withCredentials: true }
+          headers: { Authorization: `${token}` },
+          withCredentials: true 
+        }
       );
       if (res.data.success) {
         dispatch(setCart(res.data.cart));
-        toast.success(`${productName} added to cart!`);
+        toast.success("Added to cart");
       }
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Failed to add to cart");
+      toast.error(error?.response?.data?.message || "Please login first");
     } finally {
-      setAdding(false);
+      setLoading(false);
+    }
+  };
+
+  const updateQuantity = async (e, newQty) => {
+    e.stopPropagation();
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("accessToken");
+      
+      if (newQty < 1) {
+        // Remove item if quantity is < 1
+        const res = await axios.delete(
+          `${import.meta.env.VITE_API_URL}/cart/remove-item/${_id}`,
+          {
+            headers: { Authorization: token },
+            withCredentials: true
+          }
+        );
+        if (res.data.success) {
+          dispatch(setCart(res.data.cart));
+          toast.info("Removed from cart");
+        }
+      } else {
+        // Update quantity
+        const res = await axios.put(
+          `${import.meta.env.VITE_API_URL}/cart/update-cart`,
+          { productId: _id, quantity: newQty },
+          {
+            headers: { Authorization: token },
+            withCredentials: true
+          }
+        );
+        if (res.data.success) {
+          dispatch(setCart(res.data.cart));
+        }
+      }
+    } catch (error) {
+      toast.error("Failed to update cart");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="group bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-500 flex flex-col h-full">
+    <div 
+      onClick={() => navigate(`/product/${_id}`)}
+      className="group bg-white rounded-3xl border border-slate-200 overflow-hidden hover:shadow-2xl hover:shadow-blue-200/50 transition-all duration-500 flex flex-col h-full cursor-pointer"
+    >
       
       {/* Image Container */}
-      <div className="relative h-56 bg-slate-100 flex items-center justify-center p-4">
+      <div className="relative h-60 bg-slate-50 flex items-center justify-center p-6 border-b border-slate-50">
         <img
           src={productImg[0]?.url}
           alt={productName}
@@ -73,49 +123,60 @@ const ProductCard = ({ product }) => {
         />
 
         {/* Badge and Wishlist Heart */}
-        <div className="absolute top-3 w-full px-3 flex justify-between items-start">
-          <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider shadow-sm">
-            New
+        <div className="absolute top-4 w-full px-4 flex justify-between items-start">
+          <span className="bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded-lg uppercase tracking-wider shadow-sm">
+            TRENDING
           </span>
           <button 
             onClick={handleWishlist}
-            className={`p-2 rounded-full transition-colors shadow-md z-10 ${isWishlisted ? 'bg-red-50 text-red-500 hover:bg-red-100' : 'bg-white text-slate-400 hover:text-red-500 hover:bg-slate-50'}`}
+            className={`p-2 rounded-xl transition-all shadow-lg z-20 ${isWishlisted ? 'bg-red-50 text-red-500 hover:scale-110' : 'bg-white text-slate-300 hover:text-red-500 hover:scale-110'}`}
           >
-            <Heart size={16} fill={isWishlisted ? "currentColor" : "none"} />
-          </button>
-        </div>
-
-        {/* Hover Action — now functional */}
-        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <button
-            onClick={handleAddToCart}
-            disabled={adding}
-            className="p-3 bg-white rounded-full text-slate-900 hover:bg-blue-600 hover:text-white transition-colors shadow-lg disabled:opacity-50"
-          >
-            <ShoppingCart size={18} />
+            <Heart size={18} fill={isWishlisted ? "currentColor" : "none"} />
           </button>
         </div>
       </div>
 
       {/* Product Details */}
-      <div className="p-5 flex flex-col flex-1">
-        <h3 className="text-slate-900 font-bold text-sm mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+      <div className="p-6 flex flex-col flex-1 bg-white">
+        <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-1">{product.brand || 'Electronics'}</p>
+        <h3 className="text-slate-900 font-extrabold text-sm mb-3 line-clamp-2 h-10 leading-tight">
           {productName}
         </h3>
 
-        <div className="mt-auto flex items-center justify-between">
+        <div className="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between">
           <div className="flex flex-col">
-            <span className="text-xs text-slate-400 line-through">
-              ₹{(productPrice * 1.2).toFixed(2)}
-            </span>
-            <span className="text-lg font-extrabold text-slate-900">
-              ₹{productPrice}
+            <span className="text-xs font-black text-slate-900">
+              ₹{productPrice.toLocaleString()}
             </span>
           </div>
 
-          <button className="text-xs font-bold text-blue-600 hover:underline">
-            Details
-          </button>
+          {quantity > 0 ? (
+            <div className="flex items-center bg-blue-50 rounded-2xl p-1 gap-1">
+              <button 
+                onClick={(e) => updateQuantity(e, quantity - 1)}
+                disabled={loading}
+                className="p-2 bg-white text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm active:scale-90 disabled:opacity-50"
+              >
+                <Minus size={14} />
+              </button>
+              <span className="w-8 text-center text-sm font-bold text-blue-700">{quantity}</span>
+              <button 
+                onClick={(e) => updateQuantity(e, quantity + 1)}
+                disabled={loading}
+                className="p-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-sm active:scale-90 disabled:opacity-50"
+              >
+                <Plus size={14} />
+              </button>
+            </div>
+          ) : (
+            <button 
+              onClick={handleAddToCart}
+              disabled={loading}
+              className="p-3 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 disabled:opacity-50 active:scale-95"
+            >
+              {loading ? <Loader2 size={18} className="animate-spin" /> : <ShoppingCart size={18} />}
+            </button>
+          )}
         </div>
       </div>
     </div>
