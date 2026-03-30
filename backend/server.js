@@ -13,11 +13,10 @@ const adminRoutes = require('./routers/adminRouter');
 db();
 
 app.use(express.json());
-  app.use(cors());
-// app.use(cors({
-//   origin: "http://localhost:5173",
-//   credentials: true,
-// }));
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true,
+}));
 app.use("/auth", userRouter);
 app.use('/product',productRouter);
 app.use('/cart', cartRoutes);

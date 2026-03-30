@@ -77,6 +77,12 @@ const Navbar = () => {
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full"></span>
             </Link>
           )}
+          {user && user.role === 'admin' && (
+            <Link to="/admin/dashboard" className="flex items-center gap-1 hover:text-blue-600 transition-colors relative group">
+              <LayoutDashboard size={16} className="-mt-0.5" /> Admin Panel
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full"></span>
+            </Link>
+          )}
         </nav>
 
         {/* Action Icons */}
