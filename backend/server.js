@@ -15,8 +15,9 @@ db();
 app.use(express.json());
 app.use(cors({
   origin: [
+    "http://localhost:5173", // default vite
     "http://localhost:5174", // local
-    "https://e-commerce-hazel-phi.vercel.app/" // deployed frontend
+    "https://e-commerce-hazel-phi.vercel.app" // deployed frontend
   ],
   credentials: true,
 }));
