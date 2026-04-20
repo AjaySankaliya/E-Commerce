@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(cors({
   origin: [
     "http://localhost:5174", // local
-    "https://e-commerce-hazel-phi.vercel.app" // deployed frontend
+    "https://e-commerce-aruvuamgv-ajaysankaliyas-projects.vercel.app/" // deployed frontend
   ],
   credentials: true,
 }));
