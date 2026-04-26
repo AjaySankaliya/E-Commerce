@@ -125,11 +125,18 @@ const Navbar = () => {
                 </button>
               </div>
             ) : (
-              <Link to="/login" className="hidden sm:block">
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 rounded-xl font-bold shadow-lg shadow-blue-100">
-                  Login
-                </Button>
-              </Link>
+              <>
+                <Link to="/login" className="sm:hidden">
+                  <Button className="h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-100 text-sm">
+                    Login
+                  </Button>
+                </Link>
+                <Link to="/login" className="hidden sm:block">
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 rounded-xl font-bold shadow-lg shadow-blue-100">
+                    Login
+                  </Button>
+                </Link>
+              </>
             )}
           </div>
         </div>
