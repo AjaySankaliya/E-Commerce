@@ -378,6 +378,39 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
+const refreshToken = async (req, res) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken) {
+    return res.status(401).json({ success: false, message: "Refresh token missing" });
+  }
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.SECRET_KEY);
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.status(400).json({ success: false, message: "User not found" });
+    }
+    const newAccessToken = jwt.sign({ id: user._id }, process.env.SECRET_KEY, {
+      expiresIn: "10d",
+    });
+
+    // Set cookie just in case
+    res.cookie("accessToken", newAccessToken, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false,
+      maxAge: 10 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(200).json({
+      success: true,
+      accessToken: newAccessToken,
+    });
+  } catch (error) {
+    console.log("Refresh Token Error:", error.message);
+    return res.status(401).json({ success: false, message: "Refresh token expired" });
+  }
+};
+
 module.exports = {
   register,
   verify,
@@ -388,4 +421,5 @@ module.exports = {
   changePassword,
   getAllUser,
   updateUserProfile,
+  refreshToken,
 };

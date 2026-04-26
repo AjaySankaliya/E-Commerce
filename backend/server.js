@@ -19,7 +19,7 @@ app.use(cors({
     "http://localhost:5174", // local
     "https://e-commerce-hazel-phi.vercel.app" // deployed frontend
   ],
-  credentials: true,
+  credentials: true,    
 }));
 app.use("/auth", userRouter);
 app.use('/product',productRouter);
