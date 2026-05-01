@@ -1,12 +1,15 @@
 const nodemailer = require("nodemailer");
+const dns = require("dns");
 require("dotenv").config();
+
+// Force IPv4 resolution. Node 18+ defaults to IPv6 which causes timeouts on Render
+dns.setDefaultResultOrder("ipv4first");
 
 const verifyEmail = (token, email) => {
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
-    port: 587,
-    secure: false, // true for 465, false for other ports
-    requireTLS: true,
+    port: 465,
+    secure: true,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
