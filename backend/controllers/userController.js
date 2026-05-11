@@ -35,7 +35,7 @@ const register = async (req, res) => {
     const token = await jwt.sign({ id: newUser._id }, process.env.SECRET_KEY, {
       expiresIn: "1h",
     });
-    verifyEmail(token, email);
+    await verifyEmail(token, email);
     newUser.token = token;
     await newUser.save();
     return res.status(201).json({
@@ -207,7 +207,7 @@ const forgotPassword = async (req, res) => {
   user.otpExpiry = otpExpiry;
   await user.save();
 
-  sendOtpEmail(otp, email);
+  await sendOtpEmail(otp, email);
 
   return res.status(200).json({
     success: true,
