@@ -10,7 +10,7 @@ const sendEmail = async ({ to, subject, html, text }) => {
     throw new Error("RESEND_API_KEY is not configured");
   }
 
-  const from = (process.env.RESEND_FROM_EMAIL || process.env.EMAIL_USER || "onboarding@resend.dev").trim();
+  const from = "E-Commerce <onboarding@resend.dev>";
   const recipients = Array.isArray(to) ? to : [to];
 
   const response = await resend.emails.send({
